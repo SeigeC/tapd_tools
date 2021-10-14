@@ -1,6 +1,6 @@
 import Yaml from 'yaml'
 import {readFileSync} from 'fs'
-import newTask from "./tasuku/dist/index.js";
+import newTask from "./common/tasuku/dist/index.js";
 import prompts from './common/prompts.js'
 import node_fetch from 'node-fetch'
 import {cyan, red} from 'nanocolors'
