@@ -1,77 +1,11 @@
-import Yaml from 'yaml'
-import {readFileSync} from 'fs'
 import newTask from "./common/tasuku/dist/index.js";
-import prompts from './common/prompts.js'
-import node_fetch from 'node-fetch'
-import {cyan, red} from 'nanocolors'
+import {loading_bug, loading_story, new_branch, get_branch} from "./func/branch.js";
+import {$, nothrow, argv} from 'zx'
+import {log} from "./common/log.js";
+import {pr} from "./common/config.js";
+import {red} from "nanocolors";
 
-
-const str = readFileSync('./.config.yaml').toString()
-const {config} = Yaml.parse(str)
-
-const bug_url = (params) => {
-  return `${config.base_url}/bugs?workspace_id=${config.workspace}` + (params ? `&${encodeURI(params)}` : "")
-}
-
-const fetch = async (url) => {
-  const res = await node_fetch(url, {
-    headers: {
-      'Authorization': 'Basic ' + Buffer.from(`${config.auth}:${config.key}`, 'binary').toString('base64')
-    }
-  })
-  return (await res.json()).data
-}
-
-const bug_open_url = (bug_id) => `${config.view_url}/${config.workspace}/bugtrace/bugs/view?bug_id=${bug_id}`
-const loading_bug = async () => {
-  const not = ['verified', 'suspended']
-  const status = Object.keys(config.bug.status).filter(key => !not.includes(key))
-  const url = bug_url(`limit=200&current_owner=${config.name}&status=${status.join('|')}`)
-  const res = await fetch(url)
-  return res.map(item => {
-    const bug = item.Bug
-    return {
-      'id': bug['id'],
-      'title': bug['title'],
-      'url': bug_open_url(bug['id']),
-      'tag': 'bug',
-      'status': config.bug.status[bug['status']]
-    }
-  })
-}
-
-
-const story_url = (params) => {
-  return `${config.base_url}/stories?workspace_id=${config.workspace}` + (params ? `&${encodeURI(params)}` : "")
-}
-const story_open_url = (story) => `${config.view_url}/${config.workspace}/prong/stories/view/${story}`
-const loading_story = async () => {
-  const status = Object.keys({
-    "planning": "规划中",
-    "auditing": "评审中",
-    "status_10": "待排期",
-    "status_4": "待开发",
-    "developing": "开发中",
-    "status_12": "技术验收",
-    "product_experience": "产品验收",
-    "for_test": "验收通过待测试",
-    "testing": "测试中",
-    "status_2": "测试通过待合入",
-    "status_7": "免测待合入",
-  })
-  const url = story_url(`limit=200&developer=${config.name};&status=${status.join('|')}`)
-  const res = await fetch(url)
-  return res.map(item => {
-    const story = item.Story
-    return {
-      'id': story['id'],
-      'title': story['name'],
-      'url': story_open_url(story['id']),
-      'tag': 'story',
-      'status': config.story.status[story['status']]
-    }
-  })
-}
+$.verbose = false;
 let task = newTask()
 const {result: tapd_list} = await task("loading", async ({task}) => {
   const list = []
@@ -82,32 +16,46 @@ const {result: tapd_list} = await task("loading", async ({task}) => {
     t('查询需求', async () => {
       list.push(...await loading_story())
     })
-  ])
+  ], {
+    concurrency: 2
+  })
   await api.clear()
   return list
 })
 
-function wait(ms) {
-  return new Promise(resolve => setTimeout(() => resolve(), ms));
+const argfunc = {
+  'new': async () => {
+    const {stderr} = await nothrow(await new_branch(tapd_list))
+    log(stderr);
+  },
+  'push': async () => {
+    let {stdout: branch} = await $`git symbolic-ref --short HEAD`
+    branch = branch.substr(0, branch.length - 1)
+    for (const key in pr) {
+      const item = pr[key]
+      if (item.branch !== branch) {
+        continue
+      }
+      const tapd = tapd_list.find(tapd => {
+        return tapd.id === item.id
+      })
+      if (!tapd) {
+        log(red('无法找到 tapd'))
+        return
+      }
+      const res = await $`gh pr create --title ${tapd.title} --body ${'tapd: ' + tapd.url}`
+      return log(res.stderr)
+    }
+    log(red('无法通过当前分支找到 tapd 链接'))
+  },
+  'checkout': get_branch
+}
+if (argv._.length <= 0) {
+  process.exit()
 }
 
-await wait(300)
+const func = argfunc[argv._[0]]
+func?.()
 
 
-const project = (await prompts({
-  type: 'select',
-  name: 'value',
-  message: '请选择要拉取的项目',
-  choices: tapd_list.map(item => {
-    const tag = {
-      "bug": red('[bug]'),
-      "story": cyan('[story]'),
-    }
-    return {
-      title: `${tag[item.tag] ? tag[item.tag] + " " : ""}${item.title} ${item.status}`,
-      value: item
-    }
-  }),
-  initial: 0
-})).value
 

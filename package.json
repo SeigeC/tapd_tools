@@ -10,11 +10,15 @@
     "dev": "node index.js"
   },
   "dependencies": {
+    "ini": "^2.0.0",
     "nanocolors": "^0.2.13",
     "node-fetch": "^3.0.0",
+    "p-map": "^5.1.0",
     "prompts": "^2.4.2",
     "tasuku": "^1.0.2",
-    "yaml": "^1.10.2"
+    "valtio": "^1.2.4",
+    "yaml": "^1.10.2",
+    "zx": "^4.2.0"
   },
   "devDependencies": {
     "@types/node": "^16.10.9",
