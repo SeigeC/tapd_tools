@@ -61,11 +61,11 @@ export const new_branch = async (tapd_list) => {
     branch: branch
   }
 
-  const res = await update_story(tapd.id, {status: 'developing'})
-  if (res.Story.status !== 'developing') {
-    log(red("tapd 状态变更失败"))
-    process.exit()
-  }
+  // const res = await update_story(tapd.id, {status: 'developing'})
+  // if (res.Story.status !== 'developing') {
+  //   log(red("tapd 状态变更失败"))
+  //   process.exit()
+  // }
   rewriteConfig()
   return $`git checkout -b ${branch}`
 }

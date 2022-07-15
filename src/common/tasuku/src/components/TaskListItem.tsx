@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
-import { Task } from 'ink-task-list';
+import pkg from 'ink-task-list';
+const { Task } = pkg;
 import type { TaskObject } from '../types';
 
 const TaskListItem: FC<{

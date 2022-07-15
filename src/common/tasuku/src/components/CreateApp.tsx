@@ -1,7 +1,7 @@
 import { render } from 'ink';
 import React from 'react';
 import { TaskList } from '../types';
-import TaskListApp from './TaskListApp';
+import TaskListApp from './TaskListApp.js';
 
 export function createApp(taskList: TaskList) {
 	const inkApp = render(<TaskListApp taskList={taskList} />);

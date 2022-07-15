@@ -7,20 +7,27 @@
   "author": "486315944@qq.com <486315944@qq.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "node index.js"
+    "dev": "npx swc src -d dist && node ./dist"
   },
   "dependencies": {
     "ini": "^2.0.0",
+    "ink": "^3.2.0",
+    "ink-task-list": "^1.1.0",
     "nanocolors": "^0.2.13",
     "node-fetch": "^3.0.0",
     "p-map": "^5.1.0",
     "prompts": "^2.4.2",
+    "react": "^17.0.2",
+    "regenerator-runtime": "^0.13.9",
     "tasuku": "^1.0.2",
     "valtio": "^1.2.4",
     "yaml": "^1.10.2",
+    "yoga-layout-prebuilt": "1.10.0",
     "zx": "^4.2.0"
   },
   "devDependencies": {
+    "@swc/cli": "^0.1.55",
+    "@swc/core": "^1.2.129",
     "@types/node": "^16.10.9",
     "ts-node": "^10.3.0",
     "typescript": "^4.4.4"

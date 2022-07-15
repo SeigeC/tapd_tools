@@ -1,8 +1,8 @@
 import {proxy} from 'valtio';
 import pMap, {Options} from 'p-map';
-import {arrayAdd, arrayRemove} from './utils';
-import {TaskList, TaskObject, Awaited} from './types';
-import {createApp} from './components/CreateApp';
+import {arrayAdd, arrayRemove} from './utils.js';
+import {TaskList, TaskObject, Awaited} from './types.js';
+import {createApp} from './components/CreateApp.js';
 
 const newTask = () => {
 	const createTaskInnerApi = (taskState: TaskObject) => {
@@ -159,4 +159,4 @@ const newTask = () => {
 	return createTaskFunction(rootTaskList);
 }
 
-export = newTask;
+export default newTask;

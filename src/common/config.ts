@@ -3,7 +3,7 @@ import Yaml from "yaml";
 import node_fetch from "node-fetch";
 
 
-const str = readFileSync('.config.yaml').toString()
+const str = readFileSync('/Users/chengyuhan/go/src/github.com/MiaoSiLa/live-service/.config.yaml').toString()
 export const {config, pr} = Yaml.parse(str)
 
 export function rewriteConfig() {
@@ -15,7 +15,7 @@ export function rewriteConfig() {
 }
 
 
-export const fetch = async (url, params) => {
+export const fetch = async (url, params?) => {
   const res = await node_fetch(url, {
     method: params ? "post" : "get",
     body: params ? JSON.stringify({
@@ -26,7 +26,8 @@ export const fetch = async (url, params) => {
       'Authorization': 'Basic ' + Buffer.from(`${config.auth}:${config.key}`, 'binary').toString('base64')
     }
   })
-  const json = await res.json()
+  const json = await res.json() as object
+  // @ts-ignore
   return json.data
 }
 
@@ -38,7 +39,7 @@ export const bug_open_url = (bug_id) => {
   return `${config.view_url}/${config.workspace}/bugtrace/bugs/view?bug_id=${bug_id}`
 }
 
-export const story_url = (params) => {
+export const story_url = (params?) => {
   return `${config.base_url}/stories?workspace_id=${config.workspace}` + (params ? `&${encodeURI(params)}` : "")
 }
 export const story_open_url = (story) => {
@@ -47,5 +48,5 @@ export const story_open_url = (story) => {
 
 
 export function wait(ms) {
-  return new Promise(resolve => setTimeout(() => resolve(), ms));
+  return new Promise(resolve => setTimeout(() => resolve(null), ms));
 }
